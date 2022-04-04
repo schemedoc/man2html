@@ -40,6 +40,9 @@ extern void *xrealloc(void *ptr, size_t size);
 extern char *xstrdup(const char *s);
 
 // cgibase.c
+
+void print_html_char(int ch);
+void print_html_string(const char *str);
 const char *link_parse_page(const char *template);
 const char *link_parse_home(const char *template);
 void print_link_home(void);

@@ -31,7 +31,7 @@ html_char_escape(int ch) {
     return NULL;
 }
 
-static void
+void
 print_html_char(int ch) {
     const char *esc;
 
@@ -42,7 +42,7 @@ print_html_char(int ch) {
     }
 }
 
-static void
+void
 print_html_string(const char *str) {
     for (; *str; str++) {
         print_html_char(*str);

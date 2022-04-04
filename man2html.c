@@ -133,6 +133,28 @@ static int no_newline_output=0;         /* boolean, set by \c */
 static int newline_for_fun=0;
 static int output_possible=0;
 static int out_length=0;
+static const char *css_urls[16];
+
+static void print_html_header(const char *page, const char *section) {
+    const char **css_urlp;
+    const char *css_url;
+
+    printf("<HTML>\n");
+    printf("<HEAD>\n");
+    printf("<TITLE>");
+    print_html_string(page);
+    print_html_string("(");
+    print_html_string(section);
+    print_html_string(")");
+    printf("</TITLE>\n");
+    for (css_urlp = css_urls; (css_url = *css_urlp); css_urlp++) {
+        printf("<LINK REL=\"stylesheet\" HREF=\"");
+        print_html_string(css_url);
+        printf("\">\n");
+    }
+    printf("</HEAD>\n");
+    printf("<BODY>\n");
+}
 
 static void
 add_links(char *c)
@@ -1871,11 +1893,10 @@ scan_request(char *c) {
                     if (!t) t=fname;
                     fprintf(stderr, "ln -s %s.html %s.html\n", h, t);
                     s=strrchr(t, '.');if (!s) s=t;
-                    printf("<HTML><HEAD><TITLE> Manpage of %s</TITLE>\n"
-                           "</HEAD><BODY>\n"
-                           "See the manpage for <A HREF=\"%s.html\">%s</A>.\n"
+                    print_html_header(h, s);
+                    printf("See the manpage for <A HREF=\"%s.html\">%s</A>.\n"
                            "</BODY></HTML>\n",
-                           s, h, h);
+                           h, h);
                 } else
 #endif
                 {
@@ -2125,9 +2146,8 @@ scan_request(char *c) {
                 *sl = 0;
                 if (words > 1) {
                     output_possible=1;
-                    out_html("<HTML><HEAD><TITLE>Manpage of ");
-                    out_html(wordlist[0]);
-                    out_html("</TITLE>\n</HEAD><BODY>\n<H1>");
+                    print_html_header(wordlist[0], wordlist[1]);
+                    out_html("<H1>");
                     out_html(wordlist[0]);
                     out_html("</H1>\nSection: ");
                     if (words>4)
@@ -3090,6 +3110,18 @@ usage_maybe(const char *message) {
 }
 
 static void
+add_css_url(const char *css_url) {
+    const char **css_urlp;
+
+    for (css_urlp = css_urls; *css_urlp; css_urlp++) {
+        if (css_urlp >= css_urls + SIZE(css_urls) - 1) {
+            usage_with("too many --css-url options");
+        }
+    }
+    *css_urlp = css_url;
+}
+
+static void
 goto_dir(char *path, char **dir, char **name) {
      char *s, *t, *u;
 
@@ -3118,11 +3150,13 @@ goto_dir(char *path, char **dir, char **name) {
 enum {
     OPTION_PAGE_URL = 1000,
     OPTION_HOME_URL,
+    OPTION_CSS_URL,
 };
 
 static const struct option longopts[] = {
     { "page-url", required_argument, 0, OPTION_PAGE_URL },
     { "home-url", required_argument, 0, OPTION_HOME_URL },
+    { "css-url", required_argument, 0, OPTION_CSS_URL },
     { NULL, 0, NULL, 0 }
 };
 
@@ -3156,6 +3190,9 @@ main(int argc, char **argv) {
             break;
         case OPTION_HOME_URL:
             usage_maybe(link_parse_home(optarg));
+            break;
+        case OPTION_CSS_URL:
+            add_css_url(optarg);
             break;
         case 'D':
             goto_dir(optarg, 0, 0);
