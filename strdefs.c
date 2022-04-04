@@ -1,7 +1,7 @@
 #include "defs.h"
 
 #ifndef NULL
-#define NULL	((void *) 0)
+#define NULL    ((void *) 0)
 #endif
 
 int nroff = 1;
@@ -33,7 +33,7 @@ static STRDEF standardstring[] = {
 
 
 static STRDEF standardchar[] = {
-    { V('*','*'), 1, "*", NULL  },	/* math star */
+    { V('*','*'), 1, "*", NULL  },      /* math star */
     { V('*','A'), 1, "A", NULL  },
     { V('*','B'), 1, "B", NULL  },
     { V('*','C'), 2, "Xi", NULL  },
@@ -91,16 +91,16 @@ static STRDEF standardchar[] = {
     { V('a','a'), 1, "&#180;", NULL  },
     { V('a','p'), 1, "~", NULL  },
     { V('b','r'), 1, "|", NULL  },
-    { V('b','u'), 1, "*", NULL  }, 	/* bullet */
+    { V('b','u'), 1, "*", NULL  },      /* bullet */
     { V('b','v'), 1, "|", NULL  },
-    { V('c','i'), 1, "o", NULL  }, 	/* circle */
+    { V('c','i'), 1, "o", NULL  },      /* circle */
     { V('c','o'), 1, "&#169;", NULL  },
     { V('c','t'), 1, "&#162;", NULL  },
     { V('d','e'), 1, "&#176;", NULL  },
-    { V('d','g'), 1, "+", NULL  }, 	/* dagger */
+    { V('d','g'), 1, "+", NULL  },      /* dagger */
     { V('d','i'), 1, "&#247;", NULL  },
-    { V('e','m'), 3, "---", NULL  }, 	/* em dash */
-    { V('e','n'), 1, "-", NULL }, 	/* en dash */
+    { V('e','m'), 3, "---", NULL  },    /* em dash */
+    { V('e','n'), 1, "-", NULL },       /* en dash */
     { V('e','q'), 1, "=", NULL  },
     { V('e','s'), 1, "&#216;", NULL  },
     { V('f','f'), 2, "ff", NULL  },
@@ -118,7 +118,7 @@ static STRDEF standardchar[] = {
     { V('m','u'), 1, "&#215;", NULL  },
     { V('n','o'), 1, "&#172;", NULL  },
     { V('o','r'), 1, "|", NULL  },
-    { V('p','d'), 1, "d", NULL }, 	/* partial derivative */
+    { V('p','d'), 1, "d", NULL },       /* partial derivative */
     { V('p','l'), 1, "+", NULL  },
     { V('r','c'), 2, "&#175;|", NULL  },
     { V('r','f'), 2, "_|", NULL  },
@@ -129,7 +129,7 @@ static STRDEF standardchar[] = {
     { V('s','c'), 1, "&#167;", NULL  },
     { V('s','l'), 1, "/", NULL  },
     { V('s','q'), 2, "[]", NULL  },
-    { V('t','s'), 1, "s", NULL }, 	/* should be terminal sigma */
+    { V('t','s'), 1, "s", NULL },       /* should be terminal sigma */
     { V('u','l'), 1, "_", NULL  },
     { V('>','='), 1, "&gt;", NULL },
     { V('<','='), 1, "&lt;", NULL },
@@ -143,33 +143,33 @@ void stdinit(void) {
     stdf = &standardchar[0];
     i = 0;
     while (stdf->nr) {
-	if (stdf->st) stdf->st = xstrdup(stdf->st);
-	stdf->next = &standardchar[i];
-	stdf = stdf->next;
-	i++;
+        if (stdf->st) stdf->st = xstrdup(stdf->st);
+        stdf->next = &standardchar[i];
+        stdf = stdf->next;
+        i++;
     }
     chardef=&standardchar[0];
 
     stdf=&standardstring[0];
     i=0;
     while (stdf->nr) {
-	 /* waste a little memory, and make a copy, to avoid
-	    the segfault when we free non-malloced memory */
-	if (stdf->st) stdf->st = xstrdup(stdf->st);
-	stdf->next = &standardstring[i];
-	stdf = stdf->next;
-	i++;
+         /* waste a little memory, and make a copy, to avoid
+            the segfault when we free non-malloced memory */
+        if (stdf->st) stdf->st = xstrdup(stdf->st);
+        stdf->next = &standardstring[i];
+        stdf = stdf->next;
+        i++;
     }
     strdef=&standardstring[0];
 
     intdef=&standardint[0];
     i=0;
     while (intdef->nr) {
-	if (intdef->nr == NROFF) intdef->nr = nroff; else
-	if (intdef->nr == TROFF) intdef->nr = !nroff;
-	intdef->next = &standardint[i];
-	intdef = intdef->next;
-	i++;
+        if (intdef->nr == NROFF) intdef->nr = nroff; else
+        if (intdef->nr == TROFF) intdef->nr = !nroff;
+        intdef->next = &standardint[i];
+        intdef = intdef->next;
+        i++;
     }
     intdef = &standardint[0];
     defdef = NULL;

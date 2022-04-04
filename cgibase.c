@@ -5,8 +5,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
-#include <ctype.h>		/* tolower() */
-#include <string.h>		/* strlen() */
+#include <ctype.h>              /* tolower() */
+#include <string.h>             /* strlen() */
 #include "defs.h"
 
 /*
@@ -21,10 +21,10 @@ static int relat_html_style = 0;
  * and uses lynx, and we use lynxcgi:/home/httpd/cgi-bin.
  */
 
-static char *man2htmlpath = "/cgi-bin/man/man2html"; 	/* default */
-static char *cgibase_format = "http://%s"; 		/* host.domain:port */
-static char *cgibase_ll_format = "lynxcgi:%s"; 		/* directory */
-static char *cgibase = "http://localhost";		/* default */
+static char *man2htmlpath = "/cgi-bin/man/man2html";    /* default */
+static char *cgibase_format = "http://%s";              /* host.domain:port */
+static char *cgibase_ll_format = "lynxcgi:%s";          /* directory */
+static char *cgibase = "http://localhost";              /* default */
 
 /*
  * Separator between URL and argument string.
@@ -33,7 +33,7 @@ static char *cgibase = "http://localhost";		/* default */
  * with PATH_INFO=/a/b and QUERY_STRING=c+d+e and args $1=c, $2=d, $3=e.
  * With lynxcgi:<full path to script>?c+d+e no PATH_INFO is possible.
  */
-static char sep = '?';					/* or '/' */
+static char sep = '?';                                  /* or '/' */
 
 void
 set_separator(char s) {
@@ -76,7 +76,7 @@ static char *signature = "<HR>\n"
 "%s\n";
 
 #define TIMEFORMAT "%T GMT, %B %d, %Y"
-#define TIMEBUFSZ	500
+#define TIMEBUFSZ       500
 
 void print_sig()
 {
@@ -102,24 +102,24 @@ include_file_html(char *g) {
 
 void
 man_page_html(char *sec, char *h) {
-	if (relat_html_style) {
-		if (!h)
-			printf("<A HREF=\"../index.html\">"
-			       "Return to Main Contents</A>");
-		else
-			printf("<A HREF=\"../man%s/%s.%s.html\">%s</A>",
-			       sec, h, sec, h);
-	} else {
-		if (!h)
-			printf("<A HREF=\"%s%s\">Return to Main Contents</A>",
-			       cgibase, man2htmlpath);
-		else if (!sec)
-			printf("<A HREF=\"%s%s%c%s\">%s</A>",
-			       cgibase, man2htmlpath, sep, h, h);
-		else
-			printf("<A HREF=\"%s%s%c%s+%s\">%s</A>",
-			       cgibase, man2htmlpath, sep, sec, h, h);
-	}
+        if (relat_html_style) {
+                if (!h)
+                        printf("<A HREF=\"../index.html\">"
+                               "Return to Main Contents</A>");
+                else
+                        printf("<A HREF=\"../man%s/%s.%s.html\">%s</A>",
+                               sec, h, sec, h);
+        } else {
+                if (!h)
+                        printf("<A HREF=\"%s%s\">Return to Main Contents</A>",
+                               cgibase, man2htmlpath);
+                else if (!sec)
+                        printf("<A HREF=\"%s%s%c%s\">%s</A>",
+                               cgibase, man2htmlpath, sep, h, h);
+                else
+                        printf("<A HREF=\"%s%s%c%s+%s\">%s</A>",
+                               cgibase, man2htmlpath, sep, sec, h, h);
+        }
 }
 
 void

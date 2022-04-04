@@ -55,8 +55,8 @@ char *lookup_abbrev (char *s)
     int i=0;
 
     if (!s)
-	 return "";
+         return "";
     while (abbrev_list[i] && strcmp(s, abbrev_list[i]))
-	 i = i+2;
+         i = i+2;
     return abbrev_list[i] ? abbrev_list[i+1] : s;
 }
