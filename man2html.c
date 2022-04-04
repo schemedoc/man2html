@@ -2146,24 +2146,15 @@ scan_request(char *c) {
                 if (words > 1) {
                     output_possible=1;
                     print_html_header(wordlist[0], wordlist[1]);
-                    out_html("<H1>");
-                    out_html(wordlist[0]);
-                    out_html("</H1>\nSection: ");
-                    if (words>4)
-                        out_html(wordlist[4]);
-                    else
-                        out_html(section_name(wordlist[1]));
-                    out_html(" (");
-                    out_html(wordlist[1]);
-                    if (words>2) {
-                        out_html(")<BR>Updated: ");
-                        scan_troff(wordlist[2], 1, NULL);
-                    } else out_html(")");
-                    out_html("<BR><A HREF=\"#index\">Index</A>\n");
-                    print_link_home();
+                    {
+                        printf("<H1 CLASS=\"head-vol\">");
+                        if (words>4)
+                            print_html_string(wordlist[4]);
+                        else
+                            print_html_string(section_name(wordlist[1]));
+                        printf("</H1>");
+                    }
                     *sl='\n';
-                    out_html("<HR>\n");
-                    if (mandoc_command) out_html("<BR>BSD mandoc<BR>");
                 }
                 c = sl+1;
             } else
@@ -3293,6 +3284,7 @@ main(int argc, char **argv) {
         printf("%s", manidx);
         if (subs) printf("</DL>\n");
         printf("</DL>\n");
+        print_link_home();
         print_sig();
         printf("</BODY>\n</HTML>\n");
     } else {
