@@ -3002,7 +3002,7 @@ static char *scan_troff_mandoc(char *c, int san, char **result) {
 STRDEF *foundpages=NULL;
 
 static void
-error_page(char *s, char *t, ...) {
+error_page(const char *s, const char *t, ...) {
      va_list p;
 
      printf("<HTML><HEAD><TITLE>%s</TITLE></HEAD>\n"
@@ -3046,6 +3046,13 @@ usage(void) {
      error_page("man2html: bad invocation",
         "Call: man2html [-l|-h host.domain:port] [-p|-q] [filename]\n"
         "or:   man2html -r [filename]\n");
+}
+
+static void
+usage_maybe(const char *message) {
+    if (message) {
+        error_page("man2html: bad invocation", message);
+    }
 }
 
 static void
@@ -3115,16 +3122,16 @@ main(int argc, char **argv) {
     while ((opt = getopt_long(argc, argv, "D:?vV", longopts, NULL)) != -1) {
         switch(opt) {
         case OPTION_SECTION_PAGE_URL:
-            link_parse_section_page(optarg);
+            usage_maybe(link_parse_section_page(optarg));
             break;
         case OPTION_SECTION_URL:
-            link_parse_section(optarg);
+            usage_maybe(link_parse_section(optarg));
             break;
         case OPTION_PAGE_URL:
-            link_parse_page(optarg);
+            usage_maybe(link_parse_page(optarg));
             break;
         case OPTION_HOME_URL:
-            link_parse_home(optarg);
+            usage_maybe(link_parse_home(optarg));
             break;
         case 'D':
             goto_dir(optarg, 0, 0);
