@@ -97,6 +97,35 @@ expand_string(int nr)
         return NULL;
 }
 
+static int
+looks_like_section(const char *section, const char *limit) {
+    const char *subsection;
+    size_t len;
+
+    if (!section || !limit) return 0;
+
+    /* preceded by name or html markup */
+    if (!(isalnum(section[-2]) || section[-2]=='>')) return 0;
+
+    len = limit - section;
+
+    /* section is n or l */
+    if (strchr("nl", section[0])) return len == 1;
+
+    /* ...or starts with a digit */
+    if (!strchr("123456789", section[0])) return 0;
+
+    /* section has length at most 5, like 3Xlib */
+    if (len > 5) return 0;
+
+    /* if subsection is present, it must be all letters */
+    for (subsection = &section[1]; subsection < limit; subsection++) {
+        if (!isalpha(*subsection))
+            return 0;
+    }
+
+    return 1;
+}
 
 static char outbuffer[1024];
 static int obp=0;
@@ -166,14 +195,7 @@ add_links(char *c)
             f=idtest[j];
             /* find section - accept (1), (3F), (3Xt), (n), (l) */
             g=strchr(f,')');
-            if (g && g-f<7      /* section has length at most 5, like 3Xlib */
-                                /* preceded by name or html markup */
-                  && (isalnum(f[-1]) || f[-1]=='>')
-                                /* section is n or l or starts with a digit */
-                  && strchr("123456789nl", f[1])
-                  && (g-f == 2 || (g-f == 3 && isdigit(f[1]) && isalpha(f[2]))
-                               || (f[2] == 'X' && isdigit(f[1])))
-               ) {
+            if (looks_like_section(f+1, g)) {
                 /* this might be a link */
                 h=f-1;
                 /* skip html markup */
