@@ -1,0 +1,11 @@
+--- man2html.c.orig	2007-08-05 22:15:23.000000000 +0300
++++ man2html.c	2022-04-04 13:10:05.000000000 +0300
+@@ -20,7 +20,7 @@
+ #include <ctype.h>
+ #include <sys/stat.h>
+ #include "defs.h"
+-#include "../src/version.h"
++#include "version.h"
+ 
+ /* BSD mandoc Bd/Ed example(?) blocks */
+ #define BD_LITERAL  1
