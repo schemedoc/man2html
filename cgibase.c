@@ -9,63 +9,192 @@
 #include <string.h>             /* strlen() */
 #include "defs.h"
 
-/*
- * The default is to use cgibase. With relative html style
- * we generate URLs of the form "../manX/page.html".
- */
-static int relat_html_style = 0;
+typedef void (*link_print_func_t)(const char *section, const char *page);
+typedef link_print_func_t (*link_lookup_func_t)(const char *what);
 
-/*
- * Either the user is non-local (or local, but using httpd),
- * in which case we use http:/cgi-bin, or the user is local
- * and uses lynx, and we use lynxcgi:/home/httpd/cgi-bin.
- */
+struct link_part {
+    link_print_func_t print;
+    char *string;
+};
 
-static char *man2htmlpath = "/cgi-bin/man/man2html";    /* default */
-static char *cgibase_format = "http://%s";              /* host.domain:port */
-static char *cgibase_ll_format = "lynxcgi:%s";          /* directory */
-static char *cgibase = "http://localhost";              /* default */
+static struct link_part *link_parts_section_page;
+static struct link_part *link_parts_section;
+static struct link_part *link_parts_page;
+static struct link_part *link_parts_home;
 
-/*
- * Separator between URL and argument string.
- *
- * With http:<path to script>/a/b?c+d+e the script is called
- * with PATH_INFO=/a/b and QUERY_STRING=c+d+e and args $1=c, $2=d, $3=e.
- * With lynxcgi:<full path to script>?c+d+e no PATH_INFO is possible.
- */
-static char sep = '?';                                  /* or '/' */
-
-void
-set_separator(char s) {
-     sep = s;
+static const char *
+html_char_escape(int ch) {
+    switch (ch) {
+    case '"': return "&quot;";
+    case '&': return "&amp;";
+    case '<': return "&lt;";
+    case '>': return "&gt;";
+    }
+    return NULL;
 }
 
-void
-set_lynxcgibase(char *s) {
-     int n = strlen(cgibase_ll_format) + strlen(s);
-     char *t = (char *) xmalloc(n);
+static void
+print_html_char(int ch) {
+    const char *esc;
 
-     sprintf(t, cgibase_ll_format, s);
-     cgibase = t;
+    if ((esc = html_char_escape(ch))) {
+        printf("%s", esc);
+    } else {
+        printf("%c", ch);
+    }
 }
 
-void
-set_cgibase(char *s) {
-     int n = strlen(cgibase_format) + strlen(s);
-     char *t = (char *) xmalloc(n);
-
-     sprintf(t, cgibase_format, s);
-     cgibase = t;
+static void
+print_html_string(const char *str) {
+    for (; *str; str++) {
+        print_html_char(*str);
+    }
 }
 
-void
-set_man2htmlpath(char *s) {
-     man2htmlpath = xstrdup(s);
+static void
+link_print_section(const char *section, const char *page) {
+    (void)page;
+    print_html_char(section[0]);
 }
 
-void
-set_relative_html_links(void) {
-     relat_html_style = 1;
+static void
+link_print_subsection(const char *section, const char *page) {
+    (void)page;
+    if (section[0]) {
+        print_html_string(&section[1]);
+    }
+}
+
+static void
+link_print_page(const char *section, const char *page) {
+    (void)section;
+    print_html_string(page);
+}
+
+static link_print_func_t
+link_lookup_none(const char *what) {
+    (void)what;
+    return NULL;
+}
+
+static link_print_func_t
+link_lookup_section(const char *what) {
+    if (!strcmp(what, "{section}")) return link_print_section;
+    if (!strcmp(what, "{subsection}")) return link_print_subsection;
+    return NULL;
+}
+
+static link_print_func_t
+link_lookup_section_page(const char *what) {
+    if (!strcmp(what, "{page}")) return link_print_page;
+    return link_lookup_section(what);
+}
+
+static link_print_func_t
+link_lookup_page(const char *what) {
+    if (!strcmp(what, "{page}")) return link_print_page;
+    return NULL;
+}
+
+static const char *
+link_parse(const char *template, link_lookup_func_t lookup,
+           struct link_part **out) {
+    struct link_part *parts;
+    struct link_part *part;
+    const size_t maxparts = 15;
+    const size_t parts_size = (maxparts + 1) * sizeof(*parts);
+    const char *a;
+    const char *b;
+    char *str;
+    size_t len;
+
+    *out = NULL;
+    part = parts = xmalloc(parts_size);
+    memset(parts, 0, parts_size);
+    for (a = template; *a; a = b) {
+        b = a;
+        if (*a == '{') {
+            b++;
+            while (*b != '}') {
+                if (!isalnum(*b)) {
+                    return "syntax error";
+                }
+                b++;
+            }
+            b++;
+        } else if (*a == '}') {
+            return "syntax error";
+        } else {
+            while (*b && (*b != '{') && (*b != '}')) {
+                b++;
+            }
+        }
+        len = b - a;
+        str = xmalloc(len + 1);
+        memcpy(str, a, len);
+        str[len] = '\0';
+        //
+        if (part >= parts + maxparts) {
+            return "too many link parts";
+        }
+        if (*str == '{') {
+            if ((part->print = lookup(str)) == NULL) {
+                return "unknown directive";
+            }
+            free(str);
+        } else {
+            part->string = str;
+        }
+        part++;
+    }
+    *out = parts;
+    return NULL;
+}
+
+const char *
+link_parse_section_page(const char *template) {
+    return link_parse(template,
+                      link_lookup_section_page,
+                      &link_parts_section_page);
+}
+
+const char *
+link_parse_section(const char *template) {
+    return link_parse(template,
+                      link_lookup_section,
+                      &link_parts_section);
+}
+
+const char *
+link_parse_page(const char *template) {
+    return link_parse(template,
+                      link_lookup_page,
+                      &link_parts_page);
+}
+
+const char *
+link_parse_home(const char *template) {
+    return link_parse(template,
+                      link_lookup_none,
+                      &link_parts_home);
+}
+
+static void
+print_link(struct link_part *parts, const char *section, const char *page) {
+    struct link_part *part;
+
+    if (!parts) {
+        return;
+    }
+    for (part = parts; ; part++) {
+        if (part->print) {
+            part->print(section, page);
+        } else if (part->string) {
+            printf("%s", part->string);
+        } else {
+            break;
+        }
+    }
 }
 
 void
@@ -74,47 +203,50 @@ print_sig(void) {
 
 void
 include_file_html(char *g) {
-     printf("<A HREF=\"file:/usr/include/%s\">%s</A>&gt;", g,g);
+    printf("<A HREF=\"file:/usr/include/%s\">%s</A>&gt;", g,g);
 }
 
 void
-man_page_html(char *sec, char *h) {
-        if (relat_html_style) {
-                if (!h)
-                        printf("<A HREF=\"../index.html\">"
-                               "Return to Main Contents</A>");
-                else
-                        printf("<A HREF=\"../man%s/%s.%s.html\">%s</A>",
-                               sec, h, sec, h);
-        } else {
-                if (!h)
-                        printf("<A HREF=\"%s%s\">Return to Main Contents</A>",
-                               cgibase, man2htmlpath);
-                else if (!sec)
-                        printf("<A HREF=\"%s%s%c%s\">%s</A>",
-                               cgibase, man2htmlpath, sep, h, h);
-                else
-                        printf("<A HREF=\"%s%s%c%s+%s\">%s</A>",
-                               cgibase, man2htmlpath, sep, sec, h, h);
-        }
+man_page_html(char *section, char *page) {
+    struct link_part *parts;
+    const char *text;
+
+    if (section && page) {
+        parts = link_parts_section_page;
+        text = page;
+    } else if (section) {
+        parts = link_parts_section;
+        text = section;
+    } else if (page) {
+        parts = link_parts_page;
+        text = page;
+    } else {
+        parts = link_parts_home;
+        text = "Return to Main Contents";
+    }
+    printf("<A HREF=\"");
+    print_link(parts, section, page);
+    printf("\">");
+    print_html_string(text);
+    printf("</A>");
 }
 
 void
 ftp_html(char *f) {
-     printf("<A HREF=\"ftp://%s\">%s</A>", f, f);
+    printf("<A HREF=\"ftp://%s\">%s</A>", f, f);
 }
 
 void
 www_html(char *f) {
-     printf("<A HREF=\"http://%s\">%s</A>", f, f);
+    printf("<A HREF=\"http://%s\">%s</A>", f, f);
 }
 
 void
 mailto_html(char *g) {
-     printf("<A HREF=\"mailto:%s\">%s</A>", g, g);
+    printf("<A HREF=\"mailto:%s\">%s</A>", g, g);
 }
 
 void
 url_html(char *g) {
-     printf("<A HREF=\"%s\">%s</A>", g, g);
+    printf("<A HREF=\"%s\">%s</A>", g, g);
 }

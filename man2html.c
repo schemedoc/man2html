@@ -12,6 +12,7 @@
    Improved things a little - April 1997 & January 1998 & Dec 2001 -
    aeb@cwi.nl. */
 
+#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -3073,8 +3074,23 @@ goto_dir(char *path, char **dir, char **name) {
      }
 }
 
+enum {
+    OPTION_SECTION_PAGE_URL = 1000,
+    OPTION_SECTION_URL,
+    OPTION_PAGE_URL,
+    OPTION_HOME_URL,
+};
+
+static const struct option longopts[] = {
+    { "section-page-url", required_argument, 0, OPTION_SECTION_PAGE_URL },
+    { "section-url", required_argument, 0, OPTION_SECTION_URL },
+    { "page-url", required_argument, 0, OPTION_PAGE_URL },
+    { "home-url", required_argument, 0, OPTION_HOME_URL },
+    { NULL, 0, NULL, 0 }
+};
+
 /*
- * Call:  man2html [-l] [filename]
+ * Call:  man2html [options] [filename]
  *
  * The contents of FILENAME (or STDIN, in case FILENAME is "-" or absent)
  * are converted from man-style nroff to html, and printed on STDOUT.
@@ -3085,7 +3101,7 @@ int
 main(int argc, char **argv) {
     FILE *f;
     struct stat stbuf;
-    int l, c;
+    int l, opt;
     char *buf, *filename, *fnam = NULL;
 
 #ifdef __CYGWIN__
@@ -3096,41 +3112,31 @@ main(int argc, char **argv) {
 #endif
 
     opterr = 0;                 /* no stderr error messages */
-    while ((c = getopt (argc, argv, "D:E:hH:lL:M:pqr?vVf")) != -1) {
-         switch(c) {
-         case 'D':
-              goto_dir(optarg, 0, 0); break;
-         case 'E':
-              error_page("Error", "%s", optarg); break;
-         case 'h':
-              set_cgibase("localhost"); break;
-         case 'H':
-              set_cgibase(optarg); break;
-         case 'l':
-              set_lynxcgibase("/home/httpd"); break;
-         case 'L':
-              set_lynxcgibase(optarg); break;
-         case 'M':
-              set_man2htmlpath(optarg); break;
-         case 'p':
-              set_separator('/'); break;
-         case 'q':
-              set_separator('?'); break;
-         case 'r':
-              set_relative_html_links(); break;
-         case 'v':
-         case 'V':
-              error_page("Version", "%s from man-%s", argv[0], version);
-              exit(0);
-         case '?':
-         default:
-              usage();
-         case 'f':              /* It is rumoured that some other
-                                   incarnation of man2html uses this flag;
-                                   ignore when given for compatibility. */
-         /* case 'F': this will assign a format for man_page_html() */
-              break;
-         }
+    while ((opt = getopt_long(argc, argv, "D:?vV", longopts, NULL)) != -1) {
+        switch(opt) {
+        case OPTION_SECTION_PAGE_URL:
+            link_parse_section_page(optarg);
+            break;
+        case OPTION_SECTION_URL:
+            link_parse_section(optarg);
+            break;
+        case OPTION_PAGE_URL:
+            link_parse_page(optarg);
+            break;
+        case OPTION_HOME_URL:
+            link_parse_home(optarg);
+            break;
+        case 'D':
+            goto_dir(optarg, 0, 0);
+            break;
+        case 'v':
+        case 'V':
+            error_page("Version", "%s from man-%s", argv[0], version);
+            break;
+        case '?':
+        default:
+            usage();
+        }
     }
 
     /* Find filename */

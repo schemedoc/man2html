@@ -39,3 +39,9 @@ extern void set_relative_html_links(void);
 extern void *xmalloc(size_t size);
 extern void *xrealloc(void *ptr, size_t size);
 extern char *xstrdup(const char *s);
+
+// cgibase.c
+const char *link_parse_section_page(const char *template);
+const char *link_parse_section(const char *template);
+const char *link_parse_page(const char *template);
+const char *link_parse_home(const char *template);
