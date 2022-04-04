@@ -3095,8 +3095,6 @@ main(int argc, char **argv) {
     extern char *optarg;
 #endif
 
-    printf("Content-type: text/html\n\n");
-
     opterr = 0;                 /* no stderr error messages */
     while ((c = getopt (argc, argv, "D:E:hH:lL:M:pqr?vVf")) != -1) {
          switch(c) {
