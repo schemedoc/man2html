@@ -3086,7 +3086,7 @@ static void
 generic_usage(const char *message, FILE *stream, int status) {
     fprintf(stream, "%s\n", "usage: " PROGNAME " [options] [filename]");
     if (message) {
-        fprintf(stream, "%s\n", message);
+        fprintf(stream, "\n%s\n", message);
     }
     exit(status);
 }
@@ -3156,6 +3156,8 @@ static const struct option longopts[] = {
     { "page-url", required_argument, 0, OPTION_PAGE_URL },
     { "home-url", required_argument, 0, OPTION_HOME_URL },
     { "css-url", required_argument, 0, OPTION_CSS_URL },
+    { "version", no_argument, 0, 'V' },
+    { "help", no_argument, 0, 'h' },
     { NULL, 0, NULL, 0 }
 };
 
@@ -3182,7 +3184,7 @@ main(int argc, char **argv) {
 #endif
 
     opterr = 0;                 /* no stderr error messages */
-    while ((opt = getopt_long(argc, argv, "D:?vV", longopts, NULL)) != -1) {
+    while ((opt = getopt_long(argc, argv, "D:hvV", longopts, NULL)) != -1) {
         switch(opt) {
         case OPTION_PAGE_URL:
             usage_maybe(link_parse_page(optarg));
@@ -3196,14 +3198,17 @@ main(int argc, char **argv) {
         case 'D':
             goto_dir(optarg, 0, 0);
             break;
+        case 'h':
+            generic_usage(NULL, stdout, EXIT_SUCCESS);
+            break;
         case 'v':
         case 'V':
             printf("%s\n", VERSION);
             exit(EXIT_SUCCESS);
             break;
-        case '?':
         default:
-            usage();
+            usage_with("unknown command line option");
+            break;
         }
     }
 
