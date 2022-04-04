@@ -564,7 +564,7 @@ scan_escape(char *c) {
 	h = expand_string(i);
 	break;
     case 'f':
-	c++;	
+	c++;
 	if (*c=='\\') {
 	    c++;
 	    c=scan_escape(c);
@@ -1367,7 +1367,7 @@ char *section_list[] = {
     "8S", "Maintenance Commands",
     "8V", "Maintenance Commands",
     "L", "Local Commands",
-/* for Solaris: 
+/* for Solaris:
     "1", "User Commands",
     "1B", "SunOS/BSD Compatibility Package Commands",
     "1b", "SunOS/BSD Compatibility Package Commands",
@@ -1745,7 +1745,7 @@ scan_request(char *c) {
 		c=skip_till_newline(c+j);
 	    break;
 	case V('i','e'):
-	    /* .ie c anything : then part of if else */	
+	    /* .ie c anything : then part of if else */
 	case V('i','f'):
 	    /* .if c anything
 	     * .if !c anything
@@ -2306,7 +2306,7 @@ scan_request(char *c) {
 		  out_html(change_to_font('B'));
 		  if (*c == '\n') {
 		       /* Don't allow embedded comms after a newline */
-		       c++;	  
+		       c++;
 		       c=scan_troff(c,1,NULL);
 		  } else {
 		       /* Do allow embedded comms on the same line. */
@@ -2368,12 +2368,12 @@ scan_request(char *c) {
 	case V('D','l'):	/* BSD mandoc */
 	     c=c+j;
 	     out_html(NEWLINE);
-	     out_html("<BLOCKQUOTE>");	    
+	     out_html("<BLOCKQUOTE>");
 	     out_html(change_to_font('L'));
 	     if (*c == '\n') c++;
-	     c=scan_troff_mandoc(c, 1, NULL);	    
+	     c=scan_troff_mandoc(c, 1, NULL);
 	     out_html(change_to_font('R'));
-	     out_html("</BLOCKQUOTE>");	    
+	     out_html("</BLOCKQUOTE>");
 	     if (fillout) curpos++; else curpos=0;
 	     break;
 	case V('B','d'):	/* BSD mandoc */
@@ -2431,7 +2431,7 @@ scan_request(char *c) {
 	     break;
 	case V('X','r'):	/* BSD mandoc */
 	{
-	     /* Translate xyz 1 to xyz(1) 
+	     /* Translate xyz 1 to xyz(1)
 	      * Allow for multiple spaces.  Allow the section to be missing.
 	      */
 	     char buff[100];
@@ -2466,7 +2466,7 @@ scan_request(char *c) {
 	     out_html(NEWLINE);
 	     if (fillout) curpos++; else curpos=0;
 	}
-	break;	  
+	break;
 	case V('F','l'):	/* BSD mandoc */
 	     trans_char(c,'"','\a');
 	     c=c+j;
@@ -2551,16 +2551,16 @@ scan_request(char *c) {
 	     trans_char(c,'"','\a');
 	     c=c+j;
 	     if (*c == '\n') c++;
-	     sp = c;	  
-	     do {		/* Find first whitespace after the 
-				 * first word that isn't a mandoc macro 
+	     sp = c;
+	     do {		/* Find first whitespace after the
+				 * first word that isn't a mandoc macro
 				 */
-		  while (*sp && isspace(*sp)) sp++;	    
+		  while (*sp && isspace(*sp)) sp++;
 		  while (*sp && !isspace(*sp)) sp++;
 	     } while (*sp && isupper(*(sp-2)) && islower(*(sp-1)));
 
-			/* Use a newline to mark the end of text to 
-			 * be quoted 
+			/* Use a newline to mark the end of text to
+			 * be quoted
 			 */
 	     if (*sp) *sp = '\n';
 	     out_html("`");	/* Quote the text */
@@ -2623,7 +2623,7 @@ scan_request(char *c) {
 	     c=c+j;
 	     if (mandoc_synopsis) {
 		  /*
-		   * Break lines only in the Synopsis. 
+		   * Break lines only in the Synopsis.
 		   * The Synopsis section seems to be treated
 		   * as a special case - Bummer!
 		   */
@@ -2644,7 +2644,7 @@ scan_request(char *c) {
 			    *end = t;
 		  }
 		  count++;
-	     }			
+	     }
 	     out_html(change_to_font('B'));
 	     while (*c == ' ' || *c == '\t') c++;
 	     if (*c == '\n') {
@@ -2758,7 +2758,7 @@ scan_request(char *c) {
 		argument=oldargument;
 		for (i=0; i<words; i++) if (wordlist[i]) free(wordlist[i]);
 		*sl='\n';
-	    } else if (mandoc_command && 
+	    } else if (mandoc_command &&
 		       ((isupper(*c) && islower(c[1]))
 			|| (islower(*c) && isupper(c[1])))) {
 		 /*
