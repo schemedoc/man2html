@@ -493,8 +493,16 @@ change_to_font(int nr)
 {
   int i;
   switch (nr) {
-  case '0': nr++;
-  case '1': case '2': case '3': case '4':
+  case '0':
+      nr++;
+      /* fallthrough */
+  case '1':
+      /* fallthrough */
+  case '2':
+      /* fallthrough */
+  case '3':
+      /* fallthrough */
+  case '4':
        nr = nr-'1'; break;
   case V('C','W'): nr=3; break;
   case 'L': nr=3; break;
@@ -582,6 +590,7 @@ scan_escape(char *c) {
         }
         break;
     case 'k': c++; if (*c=='(') c+=2;
+        /* fallthrough */
     case '^':
     case '!':
     case '%':
@@ -683,7 +692,10 @@ scan_escape(char *c) {
         skip_escape=exskipescape;
         intresult=j;
         break;
-    case 'l': h="<HR>"; curpos=0;
+    case 'l':
+        h="<HR>";
+        curpos=0;
+        /* fallthrough */
     case 'b':
     case 'v':
     case 'x':
@@ -710,7 +722,12 @@ scan_escape(char *c) {
     case 't': h="\t";curpos=(curpos+8)&0xfff8; break;
     case '<': h="&lt;";curpos++; break;
     case '>': h="&gt;";curpos++; break;
-    case '\\': if (single_escape) { c--; break;}
+    case '\\':
+        if (single_escape) {
+            c--;
+            break;
+        }
+        /* fallthrough */
     default: b[0]=*c; b[1]=0; h=b; curpos++; break;
     }
     c++;
@@ -1075,6 +1092,7 @@ scan_table(char *c) {
                 break;
             case '^':
                 if (ti1) ti1->rowspan++;
+                /* fallthrough */
             default:
                 if (!ti2) ti2=ti;
                 else {
@@ -1110,6 +1128,7 @@ scan_table(char *c) {
                 switch (curfield->align) {
                 case 'N':
                     curfield->space+=4;
+                    /* fallthrough */
                 case 'R':
                     out_html(" ALIGN=right");
                     break;
@@ -1263,14 +1282,23 @@ char *scan_expression(char *c, int *result) {
                 break;
             case '-':
                 if (oper) { sign=-1; c++; break; }
+                /* fallthrough */
             case '>':
+                /* fallthrough */
             case '<':
+                /* fallthrough */
             case '+':
+                /* fallthrough */
             case '/':
+                /* fallthrough */
             case '*':
+                /* fallthrough */
             case '%':
+                /* fallthrough */
             case '&':
+                /* fallthrough */
             case '=':
+                /* fallthrough */
             case ':':
                 if (c[1]=='=') oper=(*c++) +16; else oper=*c;
                 c++;
@@ -1638,6 +1666,7 @@ scan_request(char *c) {
             }
         case V('d','s'):
             mode=1;
+            /* fallthrough */
         case V('a','s'):
             {
                 STRDEF *de;
@@ -1735,6 +1764,7 @@ scan_request(char *c) {
             else escapesym='\\';
             break;
             c=skip_till_newline(c);
+            /* fallthrough */
         case V('e','o'):
             escapesym=0;
             c=skip_till_newline(c);
@@ -1973,11 +2003,17 @@ scan_request(char *c) {
             out_html(change_to_font('R'));
             out_html("[");
             curpos++;
+            /* fallthrough */
         case V('B','R'):
+            /* fallthrough */
         case V('B','I'):
+            /* fallthrough */
         case V('I','B'):
+            /* fallthrough */
         case V('I','R'):
+            /* fallthrough */
         case V('R','B'):
+            /* fallthrough */
         case V('R','I'):
             {
                 char font[2];
@@ -2082,7 +2118,9 @@ scan_request(char *c) {
                 curpos=0;
                 break;
             }
+            /* fallthrough */
         case V('R','e'):        /* BSD mandoc */
+            /* fallthrough */
         case V('R','E'):
             dl_endlevel();
             c=skip_till_newline(c);
@@ -2105,11 +2143,13 @@ scan_request(char *c) {
             break;
         case V('S','s'):        /* BSD mandoc */
             mandoc_command = 1;
+            /* fallthrough */
         case V('S','S'):
             mode=1;
             goto sh_below;
         case V('S','h'):        /* BSD mandoc */
             mandoc_command = 1;
+            /* fallthrough */
         case V('S','H'):
         sh_below:
             c=c+j;
@@ -2141,6 +2181,7 @@ scan_request(char *c) {
             break;
         case V('D','t'):        /* BSD mandoc */
             mandoc_command = 1;
+            /* fallthrough */
         case V('T','H'):
             if (!output_possible) {
                 sl = fill_words(c+j, wordlist, SIZE(wordlist), &words, 0);
@@ -2239,6 +2280,7 @@ scan_request(char *c) {
             /* .am xx yy : append to a macro. */
             /* define or handle as .ig yy */
             mode=1;
+            /* fallthrough */
         case V('d','e'):
             /* .de xx yy : define or redefine macro xx; end at .yy (..) */
             /* define or handle as .ig yy */
