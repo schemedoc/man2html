@@ -3128,7 +3128,8 @@ main(int argc, char **argv) {
             break;
         case 'v':
         case 'V':
-            error_page("Version", "%s from man-%s", argv[0], version);
+            printf("%s\n", version);
+            exit(EXIT_SUCCESS);
             break;
         case '?':
         default:
