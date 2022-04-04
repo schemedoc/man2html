@@ -3042,16 +3042,28 @@ xrealloc(void *ptr, size_t size) {
 }
 
 static void
+generic_usage(const char *message, FILE *stream, int status) {
+    fprintf(stream, "%s\n", "usage: " PROGNAME " [options] [filename]");
+    if (message) {
+        fprintf(stream, "%s\n", message);
+    }
+    exit(status);
+}
+
+static void
 usage(void) {
-     error_page("man2html: bad invocation",
-        "Call: man2html [-l|-h host.domain:port] [-p|-q] [filename]\n"
-        "or:   man2html -r [filename]\n");
+    generic_usage(NULL, stderr, EXIT_FAILURE);
+}
+
+static void
+usage_with(const char *message) {
+    generic_usage(message, stderr, EXIT_FAILURE);
 }
 
 static void
 usage_maybe(const char *message) {
     if (message) {
-        error_page("man2html: bad invocation", message);
+        usage_with(message);
     }
 }
 
@@ -3128,7 +3140,7 @@ main(int argc, char **argv) {
             break;
         case 'v':
         case 'V':
-            printf("%s\n", version);
+            printf("%s\n", VERSION);
             exit(EXIT_SUCCESS);
             break;
         case '?':

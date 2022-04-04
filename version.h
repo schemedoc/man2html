@@ -1,1 +1,2 @@
-static char version[] = "man-1.6g-schemedoc";
+#define PROGNAME "man2html"
+#define VERSION "man-1.6g-schemedoc"
