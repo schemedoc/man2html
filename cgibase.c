@@ -17,8 +17,6 @@ struct link_part {
     char *string;
 };
 
-static struct link_part *link_parts_section_page;
-static struct link_part *link_parts_section;
 static struct link_part *link_parts_page;
 static struct link_part *link_parts_home;
 
@@ -74,12 +72,6 @@ link_print_page(const char *section, const char *page) {
 }
 
 static link_print_func_t
-link_lookup_none(const char *what) {
-    (void)what;
-    return NULL;
-}
-
-static link_print_func_t
 link_lookup_section(const char *what) {
     if (!strcmp(what, "{section}")) return link_print_section;
     if (!strcmp(what, "{subsection}")) return link_print_subsection;
@@ -87,14 +79,14 @@ link_lookup_section(const char *what) {
 }
 
 static link_print_func_t
-link_lookup_section_page(const char *what) {
+link_lookup_page(const char *what) {
     if (!strcmp(what, "{page}")) return link_print_page;
     return link_lookup_section(what);
 }
 
 static link_print_func_t
-link_lookup_page(const char *what) {
-    if (!strcmp(what, "{page}")) return link_print_page;
+link_lookup_none(const char *what) {
+    (void)what;
     return NULL;
 }
 
@@ -154,20 +146,6 @@ link_parse(const char *template, link_lookup_func_t lookup,
 }
 
 const char *
-link_parse_section_page(const char *template) {
-    return link_parse(template,
-                      link_lookup_section_page,
-                      &link_parts_section_page);
-}
-
-const char *
-link_parse_section(const char *template) {
-    return link_parse(template,
-                      link_lookup_section,
-                      &link_parts_section);
-}
-
-const char *
 link_parse_page(const char *template) {
     return link_parse(template,
                       link_lookup_page,
@@ -209,27 +187,22 @@ include_file_html(char *g) {
 }
 
 void
-man_page_html(char *section, char *page) {
-    struct link_part *parts;
-    const char *text;
-
-    if (section && page) {
-        parts = link_parts_section_page;
-        text = page;
-    } else if (section) {
-        parts = link_parts_section;
-        text = section;
-    } else if (page) {
-        parts = link_parts_page;
-        text = page;
-    } else {
-        parts = link_parts_home;
-        text = "Return to Main Contents";
-    }
+print_link_home(void)
+{
     printf("<A HREF=\"");
-    print_link(parts, section, page);
+    print_link(link_parts_home, "", "");
     printf("\">");
-    print_html_string(text);
+    print_html_string("Return to Main Contents");
+    printf("</A>");
+}
+
+void
+print_link_page(const char *section, const char *page)
+{
+    printf("<A HREF=\"");
+    print_link(link_parts_page, section, page);
+    printf("\">");
+    print_html_string(page);
     printf("</A>");
 }
 

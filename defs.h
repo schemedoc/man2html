@@ -26,7 +26,6 @@ extern void stdinit(void);
 extern void print_sig(void);
 extern char *lookup_abbrev(char *);
 extern void include_file_html(char *);
-extern void man_page_html(char*, char *);
 extern void ftp_html(char *);
 extern void www_html(char *);
 extern void mailto_html(char *);
@@ -41,7 +40,7 @@ extern void *xrealloc(void *ptr, size_t size);
 extern char *xstrdup(const char *s);
 
 // cgibase.c
-const char *link_parse_section_page(const char *template);
-const char *link_parse_section(const char *template);
 const char *link_parse_page(const char *template);
 const char *link_parse_home(const char *template);
+void print_link_home(void);
+void print_link_page(const char *section, const char *page);

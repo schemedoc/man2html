@@ -192,7 +192,7 @@ add_links(char *c)
                     *h=t;
                     tg=*g; *g=0;
                     te=*e; *e=0;
-                    man_page_html(f+1, h);      /* section, page */
+                    print_link_page(f+1, h);      /* section, page */
                     *e=te;
                     *g=tg;
                     c=e;
@@ -2119,7 +2119,7 @@ scan_request(char *c) {
                         scan_troff(wordlist[2], 1, NULL);
                     } else out_html(")");
                     out_html("<BR><A HREF=\"#index\">Index</A>\n");
-                    man_page_html(0,0); /* Return to Main Contents */
+                    print_link_home();
                     *sl='\n';
                     out_html("<HR>\n");
                     if (mandoc_command) out_html("<BR>BSD mandoc<BR>");
@@ -3082,15 +3082,11 @@ goto_dir(char *path, char **dir, char **name) {
 }
 
 enum {
-    OPTION_SECTION_PAGE_URL = 1000,
-    OPTION_SECTION_URL,
-    OPTION_PAGE_URL,
+    OPTION_PAGE_URL = 1000,
     OPTION_HOME_URL,
 };
 
 static const struct option longopts[] = {
-    { "section-page-url", required_argument, 0, OPTION_SECTION_PAGE_URL },
-    { "section-url", required_argument, 0, OPTION_SECTION_URL },
     { "page-url", required_argument, 0, OPTION_PAGE_URL },
     { "home-url", required_argument, 0, OPTION_HOME_URL },
     { NULL, 0, NULL, 0 }
@@ -3121,12 +3117,6 @@ main(int argc, char **argv) {
     opterr = 0;                 /* no stderr error messages */
     while ((opt = getopt_long(argc, argv, "D:?vV", longopts, NULL)) != -1) {
         switch(opt) {
-        case OPTION_SECTION_PAGE_URL:
-            usage_maybe(link_parse_section_page(optarg));
-            break;
-        case OPTION_SECTION_URL:
-            usage_maybe(link_parse_section(optarg));
-            break;
         case OPTION_PAGE_URL:
             usage_maybe(link_parse_page(optarg));
             break;
