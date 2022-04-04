@@ -54,7 +54,9 @@ print_html_string(const char *str) {
 static void
 link_print_section(const char *section, const char *page) {
     (void)page;
-    print_html_char(section[0]);
+    if (section[0]) {
+        print_html_char(section[0]);
+    }
 }
 
 static void
