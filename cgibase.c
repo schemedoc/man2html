@@ -68,31 +68,8 @@ set_relative_html_links(void) {
      relat_html_style = 1;
 }
 
-/* What shall we say in case of relat_html_style? */
-static char *signature = "<HR>\n"
-"This document was created by\n"
-"<A HREF=\"%s%s\">man2html</A>,\n"
-"using the manual pages.<BR>\n"
-"%s\n";
-
-#define TIMEFORMAT "%T GMT, %B %d, %Y"
-#define TIMEBUFSZ       500
-
-void print_sig()
-{
-    char timebuf[TIMEBUFSZ];
-    struct tm *timetm;
-    time_t clock;
-
-    timebuf[0] = 0;
-#ifdef TIMEFORMAT
-    sprintf(timebuf, "Time: ");
-    clock=time(NULL);
-    timetm=gmtime(&clock);
-    strftime(timebuf+6, TIMEBUFSZ-6, TIMEFORMAT, timetm);
-    timebuf[TIMEBUFSZ-1] = 0;
-#endif
-    printf(signature, cgibase, man2htmlpath, timebuf);
+void
+print_sig(void) {
 }
 
 void
