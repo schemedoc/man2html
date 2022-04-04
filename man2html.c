@@ -2123,11 +2123,13 @@ scan_request(char *c) {
             }
             trans_char(c,'"', '\a');
             add_to_index(mode, c);
-            out_html("<A NAME=\"");
+            if (!mode)
+                out_html("<H2");
+            else
+                out_html("<H3");
+            out_html(" ID=\"");
             out_html(label);
-            /* &nbsp; for mosaic users */
-            if (mode) out_html("\">&nbsp;</A>\n<H3>");
-            else out_html("\">&nbsp;</A>\n<H2>");
+            out_html("\">");
             mandoc_synopsis = (strncmp(c, "SYNOPSIS", 8) == 0);
             c = (mandoc_command ? scan_troff_mandoc : scan_troff)(c,1,NULL);
             if (mode) out_html("</H3>\n");
