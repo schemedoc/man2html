@@ -341,7 +341,7 @@ out_html(char *c) {
 /* --------------------------------------------------------------- */
 /* All references to dl_set and itemdepth are here.                */
 /* --------------------------------------------------------------- */
-static int itemdepth=0;
+static size_t itemdepth=0;
 static int dl_set[30]= { 0 };
 #define noDL    0
 #define DL      1
@@ -1884,7 +1884,7 @@ scan_request(char *c) {
                 if (*c == '-' || *c == '+') tabstops[j]+=tabstops[j-1];
                 c=sl;
                 while (*c == ' ' || *c == '\t') c++;
-                if (j+1 < SIZE(tabstops))
+                if (j+1 < (int)(SIZE(tabstops)))
                     j++;
             }
             maxtstop=j;
@@ -2742,7 +2742,7 @@ scan_request(char *c) {
                          scan_troff(wordlist[i],1,&h);
                     wordlist[i]=h;
                 }
-                for (i=words; i<SIZE(wordlist); i++)
+                for (i=words; i<(int)(SIZE(wordlist)); i++)
                     wordlist[i]=NULL;
                 deflen = strlen(owndef->st);
                 owndef->st[deflen+1]='a';
