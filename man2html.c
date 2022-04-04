@@ -115,8 +115,7 @@ looks_like_section(const char *section, const char *limit) {
     /* ...or starts with a digit */
     if (!strchr("123456789", section[0])) return 0;
 
-    /* section has length at most 5, like 3Xlib */
-    if (len > 5) return 0;
+    if (len > 10) return 0;
 
     /* if subsection is present, it must be all letters */
     for (subsection = &section[1]; subsection < limit; subsection++) {
