@@ -122,6 +122,19 @@ expand_string(int nr)
         return NULL;
 }
 
+static const char *
+portable_basename(const char *str) {
+    const char *pos;
+
+    pos = strchr(str, 0);
+    for (;;) {
+        if (pos == str) break;
+        if (pos[-1] == '/') break;
+        pos--;
+    }
+    return pos;
+}
+
 static int
 looks_like_section(const char *section, const char *limit) {
     const char *subsection;
@@ -1915,62 +1928,15 @@ scan_request(char *c) {
             break;
         case V('s','o'):
             {
-                FILE *f;
-                struct stat stbuf;
-                int l; char *buf;
-                char *name = NULL;
-
                 curpos=0;
                 c += j;                 /* skip .so part and whitespace */
-                if (*c == '/') {
-                    h = c;
-                } else {                /* .so man3/cpow.3 -> ../man3/cpow.3 */
-                    h = c-3;
-                    h[0] = '.';
-                    h[1] = '.';
-                    h[2] = '/';
-                }
+                h = c;
                 while (*c != '\n') c++;
                 while (c[-1] == ' ') c--;
                 while (*c != '\n') *c++ = 0;
                 *c = 0;
-                scan_troff(h,1, &name);
-                if (name[3] == '/') h=name+3; else h=name;
-                l = 0;
-                if (stat(h, &stbuf)!=-1) l=stbuf.st_size;
-                buf = (char*) xmalloc((l+4)*sizeof(char));
-#if NOCGI
-                if (!out_length) {
-                    char *t,*s;
-                    t=strrchr(fname, '/');
-                    if (!t) t=fname;
-                    fprintf(stderr, "ln -s %s.html %s.html\n", h, t);
-                    s=strrchr(t, '.');if (!s) s=t;
-                    print_html_header(h, s);
-                    printf("See the manpage for <A HREF=\"%s.html\">%s</A>.\n"
-                           "</BODY></HTML>\n",
-                           h, h);
-                } else
-#endif
-                {
-                    /* this works alright, except for section 3 */
-                    if (!l || !(f = fopen(h,"r"))) {
-                         fprintf(stderr,
-                                "man2html: unable to open or read file %s\n", h);
-                         out_html("<BLOCKQUOTE>"
-                                  "man2html: unable to open or read file\n");
-                         out_html(h);
-                         out_html("</BLOCKQUOTE>\n");
-                    } else {
-                        i=fread(buf+1,1,l,f);
-                        fclose(f);
-                        buf[0]=buf[l]='\n';
-                        buf[l+1]=buf[l+2]=0;
-                        scan_troff(buf+1,0,NULL);
-                    }
-                    if (buf) free(buf);
-                }
-                *c++='\n';
+                printf("%s\n", portable_basename(h));
+                exit(EXIT_SO_LINK);
                 break;
             }
         case V('t','a'):
