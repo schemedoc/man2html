@@ -23,6 +23,15 @@
 #include "defs.h"
 #include "version.h"
 
+#undef EXIT_SUCCESS
+#undef EXIT_FAILURE
+
+#define EXIT_SUCCESS   0
+#define EXIT_SO_LINK   1
+#define EXIT_BAD_USAGE 2
+#define EXIT_BAD_INPUT 3
+#define EXIT_LIMIT     4
+
 /* BSD mandoc Bd/Ed example(?) blocks */
 #define BD_LITERAL  1
 #define BD_INDENT   2
@@ -56,6 +65,23 @@ static char **argument=NULL;
 
 static char charb[3];
 
+static void
+warning(const char *message) {
+    fprintf(stderr, "%s: %s\n", PROGNAME, message);
+}
+
+static void
+exit_limit(const char *message) {
+    warning(message);
+    exit(EXIT_LIMIT);
+}
+
+static void
+exit_bad_input(const char *message) {
+    warning(message);
+    exit(EXIT_BAD_INPUT);
+}
+
 static char *
 expand_char(int nr)
 {
@@ -66,8 +92,7 @@ expand_char(int nr)
 
         h = chardef;
         if (h->nr != V('*','*')) {
-                printf("chardef corrupted\n");
-                exit(1);
+                exit_bad_input("chardef corrupted\n");
         }
 
         for (h = chardef; h; h = h->next)
@@ -1631,8 +1656,7 @@ scan_request(char *c) {
                 buffer[buffpos]=0;
                 printf("%s\n", buffer);
             }
-            fprintf(stderr, "%s\n", c+2);               /* XXX */
-            exit(0);
+            exit_bad_input(c+2);               /* XXX */
             break;
         case V('d','i'):
             {
@@ -1770,7 +1794,7 @@ scan_request(char *c) {
             c=skip_till_newline(c);
             break;
         case V('e','x'):
-            exit(0);
+            exit_bad_input(".ex macro not supported");
             break;
         case V('f','c'):
             c=c+j;
@@ -3087,15 +3111,14 @@ error_page(const char *s, const char *t, ...) {
      vfprintf(stdout, t, p);
      va_end(p);
      printf("</BODY></HTML>\n");
-     exit(0);
+     exit(EXIT_BAD_INPUT);
 }
 
 char *
 xstrdup(const char *s) {
      char *p = strdup(s);
      if (p == NULL)
-          error_page("Out of memory",
-                         "Sorry, out of memory, aborting...\n");
+         exit_limit("out of memory");
      return p;
 }
 
@@ -3103,8 +3126,7 @@ void *
 xmalloc(size_t size) {
      void *p = malloc(size);
      if (p == NULL)
-          error_page("Out of memory",
-                         "Sorry, out of memory, aborting...\n");
+         exit_limit("out of memory");
      return p;
 }
 
@@ -3112,8 +3134,7 @@ void *
 xrealloc(void *ptr, size_t size) {
      void *p = realloc(ptr,size);
      if (p == NULL)
-          error_page("Out of memory",
-                         "Sorry, out of memory, aborting...\n");
+         exit_limit("out of memory");
      return p;
 }
 
@@ -3128,12 +3149,12 @@ generic_usage(const char *message, FILE *stream, int status) {
 
 static void
 usage(void) {
-    generic_usage(NULL, stderr, EXIT_FAILURE);
+    generic_usage(NULL, stderr, EXIT_BAD_USAGE);
 }
 
 static void
 usage_with(const char *message) {
-    generic_usage(message, stderr, EXIT_FAILURE);
+    generic_usage(message, stderr, EXIT_BAD_USAGE);
 }
 
 static void
@@ -3349,5 +3370,5 @@ main(int argc, char **argv) {
          fclose(idxfile);
     if (buf)
          free(buf);
-    return 0;
+    return EXIT_SUCCESS;
 }
